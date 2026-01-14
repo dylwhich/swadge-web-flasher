@@ -1,0 +1,14 @@
+{
+  "name": "Pulse Helmet Release Firmware",
+  "version": "v3.2.0",
+  "new_install_prompt_erase": true,
+  "new_install_improv_wait_time": 0,
+  "builds": [
+    {
+      "chipFamily": "ESP32-S2",
+      "parts": [
+        { "path": "firmware/2026/merged.bin", "offset": 0 }
+      ]
+    }
+  ]
+}

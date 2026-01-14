@@ -2,10 +2,10 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Squeezelite-ESP32 installer</title>
+    <title>Swadge Firmware Updater</title>
     <meta
       name="description"
-      content="Easily allow users to install Squeezelite-ESP32 firmware on the web."
+      content="Easily allow updating Swadge firmware without installing stuff"
     />
     <meta name="viewport" content="width=device-width" />
     <meta name="color-scheme" content="dark light" />
@@ -79,31 +79,40 @@
   </head>
   <body>
     <div class="content">
-      <h1>Squeezelite-ESP32 installer</h1>
-      <p>This is a prototype and not up-to-date. For latest installations, see the <a href="https://sle118.github.io/squeezelite-esp32-installer/">Squeezelite Web Installer</a>.</p>
-      <p>Select your product</p>
+      <h1>Swadge Firmware Updater</h1>
+      <p>What kind of Swadge do you have?</p>
       <ul class="radios">
         <li>
-          <label><input type="radio" name="type" value="i2s" /> I2S</label>
+          <label><input type="radio" name="type" value="pulse" /> Pulse Helmet (2026)</label>
+        </li>
+        <!--<li>
+          <label><input type="radio" name="type" value="chilidog" /> Chili Dog (2025)</label>
         </li>
         <li>
-          <label><input type="radio" name="type" value="muse" /> Muse</label>
+          <label><input type="radio" name="type" value="gunship" /> Gunship (2024)</label>
         </li>
         <li>
-          <label><input type="radio" name="type" value="muse_proto" /> Muse Proto</label>
-        </li>
-        <li>
-          <label><input type="radio" name="type" value="squeezeamp" /> SqueezeAmp</label>
-        </li>
+          <label><input type="radio" name="type" value="squarewavebird" /> Squarewavebird (2023)</label>
+        </li>-->
       </ul>
+      <div id="program-button-container" class="invisible">
+        <p class="button-pulse button-chilidog button-gunship button-squarewavebird">
+        <ol>
+          <li>Turn your Swadge's power switch to the <code>OFF/USB</code> position</li>
+          <li>Hold the <code>UP</code> button on the D-Pad</li>
+          <li>Plug your Swadge into your computer</li>
+          <li>Release the <code>UP</code> button</li>
+          <li>Press the "Connect" button below</li>
+          <li>Select the port with "ESP32" in the name</li>
+        </ol>
+        </p>
+      </div>
       <p class="button-row" align="center">
         <esp-web-install-button class="invisible"></esp-web-install-button>
       </p>
 
       <div class="footer">
-        <a href="https://github.com/sle118/squeezelite-esp32"
-          >Squeezelite-ESP32</a
-        > &mdash;
+        <a href="https://magfest.org">MAGFest</a> <a href="https://swadge.com">Swadge</a> &mdash;
         Installer powered by <a href="https://esphome.github.io/esp-web-tools/">ESP Web Tools</a>.
     </div>
     <script>
@@ -112,6 +121,7 @@
           const button = document.querySelector('esp-web-install-button');
           button.manifest = `./manifest_${radio.value}.json`;
           button.classList.remove('invisible');
+          document.getElementById("program-button-container").classList.remove("invisible");
         }
       ));
     </script>
