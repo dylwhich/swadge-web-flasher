@@ -7,7 +7,9 @@
     {
       "chipFamily": "ESP32-S2",
       "parts": [
-        { "path": "firmware/2026/merged.bin", "offset": 0 }
+        { "path": "firmware/2026/bootloader.bin", "offset": 4096 },
+        { "path": "firmware/2026/partitions.bin", "offset": 32768 },
+        { "path": "firmware/2026/swadge.bin", "offset": 65536 }
       ]
     }
   ]

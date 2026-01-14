@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="styles.css"/>
+  </head>
+  <body style="padding: 1em">
+    <h1>Compatibility</h1>
+    <p>This Python script should be compatible with Python 2 &amp; 3. I have tested it on Windows with Python 3.</p>
+    <h1>Summary</h1>
+    <p>This Python script polls for USB serial ports which match the VID &amp; PID of an ESP32-S2. When one is found, it will attempt to flash it using <code>esptool</code>.</p>
+    <p>The UI will be green when a Swadge is successfully flashed. It will be red if the flash failed.</p>
+    <blockquote>
+    <p>[!NOTE]<br />
+    As of January 2025 the program may erroneously flash red, falsely indicating a failure, when rebooting after a successful flash. If the Swadge reboots to a valid screen, the flash was successful.</p>
+    </blockquote>
+    <p>This script may also be run in headless mode when a GUI is not required or desired.</p>
+    <pre><code>usage: pyFlashGui.py [-h] [--headless]
+
+    Optional app description
+
+    options:
+      -h, --help  show this help message and exit
+      --headless  Run in headless mode without a GUI
+    </code></pre>
+    <h1>Driver Dependencies</h1>
+    <h2>Windows</h2>
+    <p>Flashing an ESP32-S2 over USB on Windows requires a specific driver to be installed. This driver only needs to be installed once. Instructions can be found in the <a href="https://docs.espressif.com/projects/esp-idf/en/v5.2.5/esp32s2/api-guides/dfu.html#usb-drivers-windows-only">ESP-IDF Programming Guide</a> and are copied below:</p>
+    <blockquote>
+    <p><code>dfu-util</code> uses <em>libusb</em> to access the device. You have to register on Windows the device with the WinUSB driver. Please see the <a href="https://github.com/libusb/libusb/wiki/Windows#How_to_use_libusb_on_Windows">libusb wiki</a> for more details.</p>
+    <p>The drivers can be installed by the <a href="https://zadig.akeo.ie/">Zadig tool</a>. Please make sure that the device is in download mode before running the tool and that it detects the ESP32-S2 device before installing the drivers. The Zadig tool might detect several USB interfaces of ESP32-S2. Please install the WinUSB driver for only that interface for which there is no driver installed (probably it is Interface 2) and don't re-install the driver for the other interface.</p>
+    <p><strong>Warning</strong>
+    The manual installation of the driver in Device Manager of Windows is not recommended because the flashing might not work properly.</p>
+    </blockquote>
+    <h2>Linux</h2>
+    <p>The ESP-IDF Programming Guide also <a href="https://docs.espressif.com/projects/esp-idf/en/v5.2.5/esp32s2/api-guides/dfu.html#udev-rule-linux-only">specifies a udev rule for Linux</a>:</p>
+    <blockquote>
+    <p>udev is a device manager for the Linux kernel. It allows us to run <code>dfu-util</code> (and <code>idf.py dfu-flash</code>) without <code>sudo</code> for gaining access to the chip.</p>
+    <p>Create file <code>/etc/udev/rules.d/40-dfuse.rules</code> with the following content:</p>
+    <pre><code>SUBSYSTEMS==&quot;usb&quot;, ATTRS{idVendor}==&quot;303a&quot;, ATTRS{idProduct}==&quot;00??&quot;, GROUP=&quot;plugdev&quot;, MODE=&quot;0666&quot;
+    </code></pre>
+    <p><strong>Note</strong> Please check the output of command <code>groups</code>. The user has to be a member of the <em>GROUP</em> specified above. You may use some other existing group for this purpose (e.g. <em>uucp</em> on some systems instead of <em>plugdev</em>) or create a new group for this purpose.</p>
+    <p>Restart your computer so the previous setting could take into affect or run <code>sudo udevadm trigger</code> to force manually udev to trigger your new rule.</p>
+    </blockquote>
+    <h1>Script Dependencies</h1>
+    <p>This script requires <code>python3</code> which can be installed from https://www.python.org/downloads/.</p>
+    <p>The following Python modules must be installed:
+      <table>
+        <thead>
+          <tr><th>Module</th><th>URL</th><th>PIP</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>tkinter</code></td><td><a href="https://tkdocs.com/tutorial/install.html">https://tkdocs.com/tutorial/install.html</a></td><td>Tkinter (and, since Python 3.1, ttk, the interface to the newer themed widgets) is included in the Python standard library.</td></tr>
+    <tr><td><code>pyserial</code></td><td><a href="https://pyserial.readthedocs.io/en/latest/pyserial.html">https://pyserial.readthedocs.io/en/latest/pyserial.html</a></td><td><code>pip install pyserial</code></td></tr>
+    <tr><td><code>esptool</code></td><td><a href="https://docs.espressif.com/projects/esptool/en/latest/esp32s2/installation.html">https://docs.espressif.com/projects/esptool/en/latest/esp32s2/installation.html</a></td><td><code>pip install esptool</code></td></tr>
+      <tr><td><code>semver</code></td><td><a href="https://python-semver.readthedocs.io/en/latest/index.html">https://python-semver.readthedocs.io/en/latest/index.html</a></td><td><code>pip install semver</code></td></tr>
+        </tbody>
+      </table>
+    </p>
+    <p>For the script to actually flash firmware, the following files must be in the same directory as <code>pyFlashGui.py</code>:</p>
+    <p>
+      <table>
+        <thead>
+          <tr><th>File</th><th>Relative Path</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>bootloader.bin</code></td><td><code>../build/bootloader/bootloader.bin</code></td></tr>
+    <tr><td><code>swadge2024.bin</code></td><td><code>../build/swadge2024.bin</code></td></tr>
+    <tr><td><code>partition-table.bin</code></td><td><code>../build/partition_table/partition-table.bin</code></td></tr>
+        </tbody>
+      </table>
+    <p>Assuming you've checked out the whole repository, set up the IDF, and are in the <code>Super-2024-Swadge-FW</code> folder, then this should build and place the files:</p>
+    <code class="language-bash">idf.py build
+    cp ./build/bootloader/bootloader.bin ./build/swadge2024.bin ./build/partition_table/partition-table.bin ./tools/pyFlashGui/
+    </code>
+    <h1>Instructions</h1>
+    <ol>
+    <li>Download and install the dependencies
+    <ul>
+    <li><a href="https://www.python.org/downloads/">Python</a></li>
+    <li>
+    <code class="language-bash">python3 -m pip install -r requirements.txt
+    </code>
+    </li>
+    <li><a href="https://tkdocs.com/tutorial/install.html">Tkinter Installation</a> (may not be necessary)</li>
+    </ul>
+    </li>
+    <li>Download the final Swadge firmware from the <a href="https://github.com/AEFeinstein/Super-2024-Swadge-FW/releases/">Github Releases tab</a></li>
+    <li>Run the programmer script (<code>python3 pyFlashGui.py</code> from a terminal)</li>
+    <li>Switch the Swadge's power to USB</li>
+    <li>Hold the PGM button down (Up on the directional pad)
+    <ul>
+    <li>Note, for the first Hot Dog Prototype revision, the PGM button is Left, not Up</li>
+    </ul>
+    </li>
+    <li>Plug the Swadge into the computer with a USB-C cable</li>
+    <li>Wait for the GUI to flash green, then you're done.</li>
+    </ol>
+    <p>An instructional video can be found below, or can be viewed <a href="https://youtu.be/AdtCOf92yiQ">on YouTube</a>:</p>
+    <p><iframe width="560" height="315" src="https://www.youtube.com/embed/AdtCOf92yiQ" title="" frameBorder="0"   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"  allowFullScreen></iframe></p>
+    <h1>Kiosk Instructions</h1>
+    <ol>
+    <li>Switch the Swadge's power switch to USB (right position)</li>
+    <li>Press and hold the directional-pad up button (Should say &quot;PGM&quot; directly above it)</li>
+    <li>Plug the Swadge into the computer with the USB-C cable</li>
+    <li>Release the up button</li>
+    <li>Wait for the window on the computer screen to turn green</li>
+    <li>Unplug the Swadge</li>
+    <li>You're done! Switch the Swadge back to BAT (left position) to turn it on and check out the cool new features!</li>
+    </ol>
+</body>
+</html>
