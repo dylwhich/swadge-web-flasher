@@ -5,7 +5,7 @@
     <title>Swadge Firmware Updater</title>
     <meta
       name="description"
-      content="Easily allow updating Swadge firmware without installing stuff"
+      content="Update your MAGFest Swadge to the latest firmware without installing stuff"
     />
     <meta name="viewport" content="width=device-width" />
     <meta name="color-scheme" content="dark light" />
@@ -71,7 +71,8 @@
 
       <div id="unsupported-message" class="error-message hidden">
         <p>
-          Oh no! Your browser does not support WebSerial. Supported browsers are Google Chrome/Chromium, Microsoft Edge, or Opera. Mobile browsers are not supported. Please either use a supported browser, or see the <a href="pyflashgui.html">Flashing Utility Instructions</a>
+          Oh no! Your browser does not support WebSerial. Supported browsers are Google Chrome/Chromium, Microsoft Edge, or Opera. Mobile browsers are not supported.
+          Please either use a supported browser, or download the <a href="https://github.com/AEFeinstein/Super-2024-Swadge-FW/releases/download/v3.1.0/9b7b99f_swadge2024-firmware.zip">Flashing Utility</a> and follow <a href="pyflashgui.html">the Flashing Utility instructions</a>.
         </p>
       </div>
       <div id="not-found-message" class="error-message hidden">
@@ -82,7 +83,10 @@
           while holding Up on the D-Pad.
         </p>
         <p>
-          You may need to install a driver in order to connect the Swadge.
+          You may need to install a driver in order to connect the Swadge. These drivers can be installed by the <a href="https://zadig.akeo.ie/">Zadig tool</a>.
+          Please make sure that the device is in flashing mode before running the tool and that it detects the ESP32-S2 device before installing the drivers.
+          The Zadig tool might detect several USB interfaces of ESP32-S2.
+          Please install the WinUSB driver for only that interface for which there is no driver installed (probably it is Interface 2) and don't re-install the driver for the other interface.
         </p>
       </div>
       <div id="fetch-error-message" class="error-message hidden">
@@ -106,9 +110,17 @@
 
       <div id="terminal"></div>
 
+      <div id="alternate-instructions">
+        <p>
+          If you are having trouble using this tool, you may instead download the <a href="https://github.com/AEFeinstein/Super-2024-Swadge-FW/releases/download/v3.1.0/9b7b99f_swadge2024-firmware.zip">Flashing Utility</a> and follow <a href="pyflashgui.html">the Flashing Utility instructions</a>.
+        </p>
+      </div>
+
       <div class="footer">
-        <a href="https://magfest.org">MAGFest</a> <a href="https://swadge.com">Swadge</a> &mdash;
-        Installer powered by <a href="https://github.com/espressif/esptool-js/">esptool-js</a>.
+        For the <a href="https://magfest.org">MAGFest</a> <a href="https://swadge.com">Swadge</a> &bull;
+        <a href="mailto:circuitboards@magfest.org">E-Mail</a> &bull;
+        <a href="https://discord.magfest.org">Discord</a> (#tech) &mdash;
+        Installer powered by <a href="https://github.com/espressif/esptool-js/">esptool-js</a>
     </div>
     <script type="module">
       import {
@@ -122,7 +134,6 @@
         window.location.href = window.location.href + '/';
       }
 
-      // TODO polyfill with navigator.usb on android (not useful for us atm)
       if (!navigator.serial)
       {
         console.log("No serial? :(");
