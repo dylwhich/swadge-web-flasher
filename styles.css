@@ -57,6 +57,34 @@ body {
   .error-message {
     color: red;
     font-weight: bold;
+    border: solid 2px #996600;
+    padding-left: 1em;
+    padding-right: 1em;
+  }
+  .big-button {
+    display: block;
+    left: auto;
+    right: auto;
+    width: 100%;
+    min-height: 50px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 3em;
+    cursor: pointer;
+    margin-top: 5px;
+    margin-bottom: 5px;
+  }
+  #connect-button {
+    background-color: #0099cc;
+  }
+  #reconnect-button {
+    background-color: #cc9900;
+  }
+  #disconnect-button {
+    background-color: #990000;
+  }
+  img {
+    margin: 5px;
   }
   @media (prefers-color-scheme: dark) {
     body {

@@ -10,62 +10,309 @@
     <meta name="viewport" content="width=device-width" />
     <meta name="color-scheme" content="dark light" />
     <link rel="stylesheet" href="styles.css" />
-    <script type="module" src="https://unpkg.com/esp-web-tools@8.0.1/dist/web/install-button.js?module"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@4.19.0/css/xterm.css">
+    <!--<script type="module" src="https://unpkg.com/esp-web-tools@8.0.1/dist/web/install-button.js?module"></script>-->
+    <!--<script type="module" src="https://unpkg.com/esptool-js/bundle.js"></script>-->
+    <script type="module" src="https://cdn.jsdelivr.net/npm/xterm@4.19.0/lib/xterm.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.js"></script>
+    <script type="text/javascript">
+      window.manifests = {
+        pulse: {
+          year: "2026",
+          desc: "",
+          userVersion: "3.1",
+          chipFamily: "ESP32-S2",
+          baudrate: 115200,
+          flashMode: "DIO",
+          flashFreq: "80m",
+          flashSize: "4MB",
+          parts: [
+            { "path": "firmware/2026/bootloader.bin", "offset": 4096 },
+            { "path": "firmware/2026/partitions.bin", "offset": 32768 },
+            { "path": "firmware/2026/swadge.bin", "offset": 65536 }
+          ]
+        }
+      }
+    </script>
   </head>
   <body>
     <div class="content">
       <h1>Swadge Firmware Updater</h1>
-      <p>What kind of Swadge do you have?</p>
-      <ul class="radios">
-        <li>
-          <label><input type="radio" name="type" value="pulse" /> Pulse Helmet (2026)</label>
-        </li>
-        <!--<li>
-          <label><input type="radio" name="type" value="chilidog" /> Chili Dog (2025)</label>
-        </li>
-        <li>
-          <label><input type="radio" name="type" value="gunship" /> Gunship (2024)</label>
-        </li>
-        <li>
-          <label><input type="radio" name="type" value="squarewavebird" /> Squarewavebird (2023)</label>
-        </li>-->
-      </ul>
-      <div id="program-button-container" class="invisible">
-        <p class="button-pulse button-chilidog button-gunship button-squarewavebird">
-        <ol>
-          <li>Turn your Swadge's power switch to the <code>OFF/USB</code> position</li>
-          <li>Hold the <code>UP</code> button on the D-Pad</li>
-          <li>Plug your Swadge into your computer</li>
-          <li>Release the <code>UP</code> button</li>
-          <li>Press the "Connect" button below</li>
-          <li>Select the port with "ESP32" in the name</li>
-        </ol>
+      <div id="swadge-select-container">
+        <p>What kind of Swadge do you have?</p>
+        <ul class="radios">
+          <li>
+            <label><input type="radio" name="type" value="pulse" /><img src="images/pulse-thumbnail.png" alt="An image of the 2026 MAGFest Swadge, which is shaped like a helmet."/><caption> Pulse Helmet (2026)</caption></label>
+          </li>
+          <!--<li>
+            <label><input type="radio" name="type" value="chilidog" /> Chili Dog (2025)</label>
+          </li>
+          <li>
+            <label><input type="radio" name="type" value="gunship" /> Gunship (2024)</label>
+          </li>
+          <li>
+            <label><input type="radio" name="type" value="squarewavebird" /> Squarewavebird (2023)</label>
+          </li>-->
+        </ul>
+      </div>
+      <div id="instructions-container">
+        <div id="instructions-pulse" class="instructions hidden">
+          <img src="images/pulse-render-annotated.png" alt="An image of the 2026 MAGFest Swadge, with two annotations indicating the position of the Program button and the Power Switch. The Program button is the &quot;Up&quot; button in the directional pad on the left-hand side, labeled &quot;PGM&quot;. The Power switch is located on the top edge of the swadge, above the &quot;A&quot; button." />
+          <ol>
+            <li>Connect one end of a USB-C cable to your Swadge's USB-C port, located next to the power button.</li>
+            <li>Set your Swadge's power switch to the <code>USB</code> position.</li>
+            <li>Hold down the Swadge's Program button (Up on the D-Pad).</li>
+            <li>While still holding down the Program button, plug the other end of the USB cable into your computer.
+              If this is done correctly, the eye LEDs should light up but the display should <em>not</em> turn on.<br/>
+            <img src="images/pulse-flash-mode-comparison.png" alt="A comparison of two images of the Swadge. The image on the left has illuminated eye LEDs and a blank display and has the label &quot;OK!&quot;. The image on the left has illuminated eye LEDs and the display shows the main menu, with the label &quot;Not OK&quot;" /></li>
+            <li>Release the Program button.</li>
+            <li>Click &quot;Connect&quot; below to locate your Swadge and begin the update.</li>
+          </ol>
+        </div>
+      </div>
+
+      <div id="unsupported-message" class="error-message hidden">
+        <p>
+          Oh no! Your browser does not support WebSerial. Supported browsers are Google Chrome/Chromium, Microsoft Edge, or Opera. Mobile browsers are not supported. Please either use a supported browser, or see the <a href="pyflashgui.html">Flashing Utility Instructions</a>
         </p>
       </div>
-      <p class="button-row" align="center">
-        <esp-web-install-button class="invisible">
-          <span slot="unsupported" class="error-message">Oh no! Your browser does not support WebSerial. Supported browsers are Google Chrome or Chromium, Microsoft Edge, or Opera. Mobile browsers are not supported. Please either use a supported browser, or see the <a href="pyflashgui.html">Flashing Utility Instructions</a></span>
-          <span slot="not-allowed" class="error-message">Ah snap, you are not allowed to use this on HTTP!</span>
-        </esp-web-install-button>
-      </p>
+      <div id="not-found-message" class="error-message hidden">
+        <p>
+          No Swadge was found! Please ensure you are holding Up button before plugging the Swadge in.
+          You may also try removing the Swadge's batteries and connecting the USB cable between your
+          Swadge and Computer, then sliding the power switch from <code>BATT</code> to <code>USB</code>
+          while holding Up on the D-Pad.
+        </p>
+        <p>
+          You may need to install a driver in order to connect the Swadge.
+        </p>
+      </div>
+      <div id="fetch-error-message" class="error-message hidden">
+        <p>
+          There was an error fetching firmware data. Please try again!
+        </p>
+      </div>
+      <div id="post-flash-instructions" class="hidden">
+        <h3>It's done!</h3>
+        <p>
+          Now, unplug your Swadge, then turn it back on. You should see the main menu, with the updated title showing &quot;Swadge 3.1&quot; as in the image below.
+          If you do not see the new version listed, then the update was not successful and you should try again.
+          If the Swadge's display does not turn on, then the update may have been interrupted and you should try again.<br/>
+          <img src="images/pulse-success-screen.png" alt="A screenshot of the Swadge main menu display. It shows the title &quot;Swadge 3.2&quot; above the five main menu items &quot;Games&quot;, &quot;Music&quot;, &quot;Utilities&quot;, &quot;SwadgePass&quot;, and &quot;Settings&quot;." />
+        </p>
+      </div>
+
+      <button id="connect-button" class="big-button invisible">Connect</button>
+      <!--<button id="reconnect-button" class="big-button hidden">Reconnect</button>
+      <button id="disconnect-button" class="big-button hidden">Disconnect</button>-->
+
+      <div id="terminal"></div>
 
       <div class="footer">
         <a href="https://magfest.org">MAGFest</a> <a href="https://swadge.com">Swadge</a> &mdash;
         Installer powered by <a href="https://esphome.github.io/esp-web-tools/">ESP Web Tools</a>.
     </div>
-    <script>
-      var lastChar = window.location.href.substr(-1); // Selects the last character
-      if (lastChar != '/') {         // If the last character is not a slash
-        window.location.href = window.location.href + '/';            // Append a slash to it.
+    <script type="module">
+      import {
+        ESPLoader,
+        Transport
+      } from "https://unpkg.com/esptool-js/bundle.js";
+
+      // Fix the path so assets don't load from the root instead of relative to index.html
+      var lastChar = window.location.href.substr(-1);
+      if (lastChar != '/') {
+        window.location.href = window.location.href + '/';
       }
+
+      // TODO polyfill with navigator.usb on android (not useful for us atm)
+      if (!navigator.serial)
+      {
+        console.log("No serial? :(");
+        document.getElementById("unsupported-message").classList.remove("hidden");
+        document.getElementById("swadge-select-container").classList.add("hidden");
+      }
+
+      async function fetchData(path) {
+        const response = await fetch(path);
+        console.log("Fetched", response);
+        if (!response.ok) {
+
+          throw new Error("Could not fetch firmware data");
+        }
+
+        return new Uint8Array(await response.arrayBuffer());
+      }
+
+      async function fetchFirmware(manifest) {
+        try {
+          return await Promise.all(manifest.parts.map(async ({path, offset}) => {
+            console.log("Fetching", path);
+            const result = { data: ESPLoader.prototype.ui8ToBstr(await fetchData(path)), address: offset };
+            console.log("Result:");
+            console.log(result);
+            return result;
+          }));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      async function doFlash(device, manifest, fileArray, terminal) {
+        console.log("Firmwares", fileArray);
+
+        let esploader = new ESPLoader({
+          transport: new Transport(device, true),
+          baudrate: manifest.baudrate,
+          terminal: terminal,
+          debugLogging: true,
+        });
+
+        try {
+          let chip = await esploader.main();
+          terminal.writeLine(`Chip detected: ${chip}`);
+
+          console.log("fileArray:");
+          console.warn(fileArray);
+
+          await esploader.writeFlash({
+            fileArray: fileArray,
+            eraseAll: false,
+            compress: true,
+            flashMode: manifest.flashMode,
+            flashFreq: manifest.flashFreq,
+            flashSize: manifest.flashSize,
+            reportProgress: (fileIndex, written, total) => {
+              console.log("...");
+            },
+            calculateMD5Hash: (image) => {
+              console.log("image should be Uint8Array but is", typeof image, "with length", image.length);
+              //const latin1String = Array.from(image, (byte) => String.fromCharCode(byte)).join("");
+              return CryptoJS.MD5(CryptoJS.enc.Latin1.parse(image)).toString();
+            }
+          });
+          console.log("Eyyy");
+          await esploader.after();
+          console.log("Yoooo it's done");
+
+          // Re-hide everything
+          document.querySelectorAll("#instructions-container .instructions").forEach(button => button.classList.add("hidden"));
+          document.getElementById("post-flash-instructions").classList.remove("hidden");
+          window.scrollTo(0, 0);
+
+        } catch (e) {
+          console.log(e);
+          throw e;
+        }
+      }
+
+      // Show only the relevant instructions when the radio changes
       document.querySelectorAll('input[name="type"]').forEach(radio =>
+        radio.addEventListener("change", () => {
+          window.boardType = radio.value;
+          document.querySelectorAll("#instructions-container .instructions").forEach(button => button.classList.add("hidden"));
+          document.getElementById(`instructions-${radio.value}`).classList.remove("hidden");
+          document.getElementById("connect-button").classList.remove("invisible");
+        })
+      );
+
+      const portFilters = [
+        // ESP32 vendor ID
+        { usbVendorId: 0x303a, usbProductId: 0x0002 },
+        // MAGFest Swadge ID (just in case)
+        { usbVendorId: 0x1209, usbProductId: 0x4269 },
+      ];
+      document.getElementById("connect-button").onclick = function() {
+        // Reset error messages
+        document.querySelectorAll("error-message").forEach(err => err.classList.add("hidden"));
+        document.getElementById("connect-button").classList.add("invisible");
+        document.getElementById("swadge-select-container").classList.add("hidden");
+
+        navigator.serial.requestPort({ filters: portFilters }).then(function(device) {
+          console.log("Connected to device:", device);
+          console.log("Board type", window.boardType);
+
+          let manifest = window.manifests[window.boardType];
+
+          console.log(`Flashing ${manifest.year}: '${manifest.desc}' version ${manifest.version}`);
+
+          fetchFirmware(manifest).then((fileArray) => {
+            console.log("Flashing with files", fileArray);
+
+            // Show and initialize the terminal
+            document.getElementById("terminal").classList.remove("hidden");
+            const terminal = new Terminal({ cols: 80, rows: 24 });
+            terminal.open(document.getElementById("terminal"));
+
+            document.querySelectorAll("#instructions-container .instructions").forEach(button => button.classList.add("hidden"));
+            window.scrollTo(0, 0);
+
+            const espLoaderTerminal = {
+              clean() {
+                terminal.clear();
+              },
+              writeLine(data) {
+                terminal.writeln(data);
+              },
+              write(data) {
+                terminal.write(data);
+              }
+            };
+            doFlash(device, manifest, fileArray, espLoaderTerminal).then(() => {
+              console.log("It done");
+            }).catch((err) => {
+              console.log("Err", err);
+              terminal.writeln(err.toString());
+            });
+          });
+        }, function(e) {
+          // No serial port found, probably swadge isn't in flashing mode
+          document.getElementById("not-found-message").classList.remove("hidden");
+          document.getElementById("connect-button").classList.remove("invisible");
+          document.getElementById("swadge-select-container").classList.remove("hidden");
+        });
+
+
+        /*try {
+          const flashOptions: FlashOptions = {
+            fileArray: fileArray,
+            eraseAll: false,
+            compress: true,
+            flashMode: flashMode.value as FlashModeValues,
+            flashFreq: flashFreq.value as FlashFreqValues,
+            flashSize: flashSize.value as FlashSizeValues,
+            reportProgress: (fileIndex, written, total) => {
+              progressBars[fileIndex].value = (written / total) * 100;
+            },
+            calculateMD5Hash: (image: Uint8Array) => {
+              const latin1String = Array.from(image, (byte) => String.fromCharCode(byte)).join("");
+              return CryptoJS.MD5(CryptoJS.enc.Latin1.parse(latin1String)).toString();
+            },
+          };
+          await esploader.writeFlash(flashOptions);
+          await esploader.after();
+        } catch (e) {
+          // eslint-disable-next-line no-console
+          console.error(e);
+          term.writeln(`Error: ${e.message}`);
+        } finally {
+          // Hide progress bars and show erase buttons
+          for (let index = 1; index < table.rows.length; index++) {
+            table.rows[index].cells[2].style.display = "none";
+            table.rows[index].cells[3].style.display = "initial";
+          }
+        }
+      }*/
+      ////////////////////////////////////////////////////////////////////////////////////////
+
+      /*document.querySelectorAll('input[name="type"]').forEach(radio =>
         radio.addEventListener("change", () => {
           const button = document.querySelector('esp-web-install-button');
           button.manifest = `./manifest_${radio.value}.json`;
           button.classList.remove('invisible');
           document.getElementById("program-button-container").classList.remove("invisible");
         }
-      ));
+      ));*/
+      };
     </script>
   </body>
 </html>
