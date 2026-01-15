@@ -172,7 +172,7 @@
         let esploader = window.esploader;
         if (!esploader) {
           esploader = new ESPLoader({
-            transport: new Transport(device, true),
+            transport: new Transport(device, false),
             baudrate: manifest.baudrate,
             terminal: terminal,
             debugLogging: false,
