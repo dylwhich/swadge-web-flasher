@@ -20,12 +20,6 @@ body {
   a {
     color: #03a9f4;
   }
-  .invisible {
-    visibility: hidden;
-  }
-  .hidden {
-    display: none;
-  }
   esp-web-install-button[install-unsupported] {
     visibility: inherit;
   }
@@ -77,7 +71,7 @@ body {
   #connect-button {
     background-color: #0099cc;
   }
-  #reconnect-button {
+  #retry-button {
     background-color: #cc9900;
   }
   #disconnect-button {
@@ -85,6 +79,12 @@ body {
   }
   img {
     margin: 5px;
+  }
+  .invisible {
+    visibility: hidden;
+  }
+  .hidden {
+    display: none;
   }
   @media (prefers-color-scheme: dark) {
     body {
